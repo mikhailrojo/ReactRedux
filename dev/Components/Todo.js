@@ -7,7 +7,7 @@ const Todo = ({onClick, completed, text, deleteIt})=>(
       textDecoration: completed ? "line-through" : "none"
     }}>
     {text}
-    <span onClick={deleteIt}>X</span>
+    <span onClick={deleteIt}><button>X</button></span>
   </li>
 )
 

@@ -14,7 +14,7 @@ let AddTodo = ({dispatch})=>{
       dispatch(addTodo(input.value.trim()));
       input.value= ""
     }}>
-      <input ref={(val)=>input = val} />
+      <input ref={(val)=>input = val} type="text" />
       <button>Добавить туду</button>
     </form>
   )

@@ -4,7 +4,7 @@ import React, {PropTypes} from 'react';
 
 
 const TodoList = ({todos, onTodoClick, deleteIt}) => (
-  <ul>
+  <ul >
   {todos.map((todo)=>
     <Todo
     key={todo.id}
