@@ -21467,6 +21467,12 @@
 
 	var _Options2 = _interopRequireDefault(_Options);
 
+	var _Searcher = __webpack_require__(207);
+
+	var _Searcher2 = _interopRequireDefault(_Searcher);
+
+	var _reactRedux = __webpack_require__(191);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21490,11 +21496,16 @@
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
-	        'div',
-	        null,
-	        _react2.default.createElement(_AddTodo2.default, { store: store }),
-	        _react2.default.createElement(_VisibleTodos2.default, { store: store }),
-	        _react2.default.createElement(_Options2.default, { store: store })
+	        _reactRedux.Provider,
+	        { store: store },
+	        _react2.default.createElement(
+	          'div',
+	          null,
+	          _react2.default.createElement(_AddTodo2.default, null),
+	          _react2.default.createElement(_VisibleTodos2.default, null),
+	          _react2.default.createElement(_Options2.default, null),
+	          _react2.default.createElement(_Searcher2.default, null)
+	        )
 	      );
 	    }
 	  }]);
@@ -22399,6 +22410,8 @@
 	  switch (action.type) {
 	    case 'SET_VISIBILITY_FILTER':
 	      return action.filter;
+	    case 'STRING_SEARCH':
+	      return action.word;
 	    default:
 	      return state;
 	  }
@@ -22443,6 +22456,11 @@
 	      });
 	    case 'ADD_TODO':
 	      return [].concat(_toConsumableArray(state), [todoReducer(null, action)]);
+	    case 'DELETE_TODO':
+	      var index = state.findIndex(function (elem, i, array) {
+	        return elem.id === action.id;
+	      });
+	      return [].concat(_toConsumableArray(state.slice(0, index)), _toConsumableArray(state.slice(index + 1)));
 	    default:
 	      return state;
 	  }
@@ -22467,6 +22485,14 @@
 	          completed: action.completed,
 	          text: action.text
 	        };
+	      }
+	    case 'DELETE_TODO':
+	      {
+	        if (action.id !== state.id) {
+	          return;
+	        } else {
+	          return null;
+	        }
 	      }
 	    default:
 	      return state;
@@ -22508,7 +22534,9 @@
 	        return !i.completed;
 	      });
 	    default:
-	      throw new Error("Такого фильтра не найдено");
+	      if (filter === "") return todos;else return todos.filter(function (i) {
+	        return i.text.toLowerCase().includes(filter);
+	      });
 	  }
 	};
 
@@ -22522,6 +22550,9 @@
 	  return {
 	    onTodoClick: function onTodoClick(id) {
 	      dispatch((0, _index.toggleTodo)(id));
+	    },
+	    deleteIt: function deleteIt(id) {
+	      dispatch((0, _index.deleteTodo)(id));
 	    }
 	  };
 	};
@@ -23267,6 +23298,7 @@
 	var TodoList = function TodoList(_ref) {
 	  var todos = _ref.todos;
 	  var onTodoClick = _ref.onTodoClick;
+	  var _deleteIt = _ref.deleteIt;
 	  return _react2.default.createElement(
 	    'ul',
 	    null,
@@ -23276,7 +23308,11 @@
 	      }, todo, {
 	        onClick: function onClick() {
 	          return onTodoClick(todo.id);
-	        } }));
+	        },
+	        deleteIt: function deleteIt() {
+	          return _deleteIt(todo.id);
+	        }
+	      }));
 	    })
 	  );
 	};
@@ -23311,6 +23347,7 @@
 	  var onClick = _ref.onClick;
 	  var completed = _ref.completed;
 	  var text = _ref.text;
+	  var deleteIt = _ref.deleteIt;
 	  return _react2.default.createElement(
 	    "li",
 	    {
@@ -23318,7 +23355,16 @@
 	      style: {
 	        textDecoration: completed ? "line-through" : "none"
 	      } },
-	    text
+	    text,
+	    _react2.default.createElement(
+	      "span",
+	      { onClick: deleteIt },
+	      _react2.default.createElement(
+	        "button",
+	        null,
+	        "X"
+	      )
+	    )
 	  );
 	};
 
@@ -23357,9 +23403,23 @@
 	  };
 	};
 
+	var stringSearch = exports.stringSearch = function stringSearch(word) {
+	  return {
+	    type: 'STRING_SEARCH',
+	    word: word.toLowerCase()
+	  };
+	};
+
 	var toggleTodo = exports.toggleTodo = function toggleTodo(id) {
 	  return {
 	    type: 'TOGGLE_TODO',
+	    id: id
+	  };
+	};
+
+	var deleteTodo = exports.deleteTodo = function deleteTodo(id) {
+	  return {
+	    type: 'DELETE_TODO',
 	    id: id
 	  };
 	};
@@ -23398,11 +23458,11 @@
 	      } },
 	    _react2.default.createElement('input', { ref: function ref(val) {
 	        return input = val;
-	      } }),
+	      }, type: 'text' }),
 	    _react2.default.createElement(
 	      'button',
 	      null,
-	      'Добавить'
+	      'Добавить туду'
 	    )
 	  );
 	};
@@ -23526,6 +23586,50 @@
 	  );
 	};
 	exports.default = Link;
+
+/***/ },
+/* 207 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _actions = __webpack_require__(202);
+
+	var _reactRedux = __webpack_require__(191);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Searcher = function Searcher(_ref) {
+	  var dispatch = _ref.dispatch;
+
+	  var inputValue = void 0;
+	  return _react2.default.createElement(
+	    'form',
+	    { onSubmit: function onSubmit(e) {
+	        e.preventDefault();
+	        dispatch((0, _actions.stringSearch)(inputValue.value));
+	      } },
+	    _react2.default.createElement('input', { ref: function ref(e) {
+	        return inputValue = e;
+	      } }),
+	    _react2.default.createElement(
+	      'button',
+	      null,
+	      'Найти туду'
+	    )
+	  );
+	};
+
+	Searcher = (0, _reactRedux.connect)()(Searcher);
+	exports.default = Searcher;
 
 /***/ }
 /******/ ]);
